@@ -1,14 +1,52 @@
 <ion-header>
   <ion-navbar>
     <ion-title>
-      Ionic Blank
+      BluetoothLe Demo
     </ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-  The world is your oyster.
-  <p>
-    If you get lost, the <a href="http://ionicframework.com/docs/v2">docs</a> will be your guide.
-  </p>
+  <ion-list>
+    <!-- <ion-item>
+        <ion-avatar item-start>
+          <img src="img/avatar-finn.png">
+        </ion-avatar>
+        <h2>Finn</h2>
+        <h3>Don't Know What To Do!</h3>
+        <p>I've had a pretty messed up day. If we just...</p>
+      </ion-item> -->
+    <ion-item (click)="init()">
+      <h2>Init</h2>
+      <p>This should be the first thing to do</p>
+    </ion-item>
+    <ion-item (click)="checkPermissions()">
+      <h2>Permissions...</h2>
+      <p> permission status goes here...</p>
+    </ion-item>
+    <ion-item (click)="checkLocations()">
+      <h2>Locations</h2>
+      <p>Location status goes here...</p>
+    </ion-item>
+    <ion-item (click)="enable()">
+      <h2>Enable</h2>
+      <p>Enable Bluetooth</p>
+    </ion-item>
+    <ion-item (click)="disable()">
+      <h2>Disable</h2>
+      <p>Disable Bluetooth</p>
+    </ion-item>
+    <ion-item (click)="getAdapterInfo()">
+      <h2>getAdapterInfo</h2>
+      <p>Click to see adapter info...</p>
+    </ion-item>
+    <ion-item (click)="scanWithTimeout()">
+      <h2>scanWithTimeout</h2>
+      <p>Click to scan devices...</p>
+    </ion-item>
+    <ion-item (click)="retrieveConnected()">
+      <h2>retrieveConnected</h2>
+      <p>Click to see all connected BLE devices</p>
+    </ion-item>
+  </ion-list>
 </ion-content>
