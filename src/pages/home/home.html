@@ -18,25 +18,25 @@
       </ion-item> -->
     <ion-item (click)="init()">
       <h2>Init</h2>
-      <p>This should be the first thing to do</p>
+      <p>{{ initStatus || 'reading...'}}</p>
     </ion-item>
-    <ion-item (click)="checkPermissions()">
+    <ion-item *ngIf="osType !== 'ios'" (click)="checkPermissions()">
       <h2>Permissions...</h2>
-      <p> permission status goes here...</p>
+      <p> {{ hasPermission || 'permission status goes here...' }}</p>
     </ion-item>
-    <ion-item (click)="checkLocations()">
+    <ion-item *ngIf="osType !== 'ios'" (click)="checkLocations()">
       <h2>Locations</h2>
-      <p>Location status goes here...</p>
+      <p>{{ isLocationEnabled || 'Location status goes here...' }}</p>
     </ion-item>
-    <ion-item (click)="enable()">
+    <ion-item *ngIf="osType !== 'ios'" (click)="enable()">
       <h2>Enable</h2>
       <p>Enable Bluetooth</p>
     </ion-item>
-    <ion-item (click)="disable()">
+    <ion-item *ngIf="osType !== 'ios'" (click)="disable()">
       <h2>Disable</h2>
       <p>Disable Bluetooth</p>
     </ion-item>
-    <ion-item (click)="getAdapterInfo()">
+    <ion-item *ngIf="osType !== 'ios'" (click)="getAdapterInfo()">
       <h2>getAdapterInfo</h2>
       <p>Click to see adapter info...</p>
     </ion-item>

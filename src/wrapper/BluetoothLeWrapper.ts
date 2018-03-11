@@ -24,8 +24,8 @@ export class BluetoothLE extends IonicNativePlugin {
   }
 
   /**
-   * Initialize Bluetooth on the device. Must be called before anything else. 
-   * Observable will continuously be used whenever Bluetooth is enabled or disabled
+   * Initialize Bluetooth on the device. Must be called before anything else. Observable will 
+   * continuously be used whenever Bluetooth is enabled or disabled & gatt server events.
    * @param params @see InitParams
    */
   @Cordova({
@@ -38,6 +38,7 @@ export class BluetoothLE extends IonicNativePlugin {
   }
 
   /**
+   * Android only
    * Enable Bluetooth on the device. Android support only. Listen to initialize callbacks for change in
    * Bluetooth state. A successful enable will return a status => enabled via initialize success callback.
    */
@@ -46,7 +47,8 @@ export class BluetoothLE extends IonicNativePlugin {
     return
   }
 
-    /**
+  /**
+   * Android only
    * Disable Bluetooth on the device. Android support only. Listen to initialize callbacks for change in
    * Bluetooth state. A successful disable will return an error => enable via initialize error callback.
    */
@@ -56,6 +58,7 @@ export class BluetoothLE extends IonicNativePlugin {
   }
 
   /**
+   * Android only
    * Retrieve useful information such as the address, name, and various states
    * (initialized, enabled, scanning, discoverable). 
    */
@@ -134,6 +137,10 @@ export class BluetoothLE extends IonicNativePlugin {
     return
   }
 
+  /**
+   * Android only
+   * @param params 
+   */
   @Cordova({
     callbackOrder: 'reverse',
     observable: true
@@ -230,6 +237,7 @@ export class BluetoothLE extends IonicNativePlugin {
   }
 
   /**
+   * iOS only
    * Discover the device's services. Not providing an array of services will return
    * all services and take longer to discover. iOS support only.
    * @param params @see ServicesDiscoverParams
@@ -245,6 +253,7 @@ export class BluetoothLE extends IonicNativePlugin {
   }
 
   /**
+   * iOS only
    * Discover the service's characteristics. Not providing an array of characteristics 
    * will return all characteristics and take longer to discover. iOS support only.
    * @param params @see CharacteristicsDiscoverParams
@@ -264,6 +273,7 @@ export class BluetoothLE extends IonicNativePlugin {
   }
 
   /**
+   * iOS only
    * Discover the characteristic's descriptors. iOS support only.
    * @param params
    */
@@ -346,6 +356,7 @@ export class BluetoothLE extends IonicNativePlugin {
   }
 
   /**
+   * Android 5+ only
    * Set MTU of a connected device. Android only.
    * @param params
    */
@@ -359,6 +370,10 @@ export class BluetoothLE extends IonicNativePlugin {
     return
   }
 
+  /**
+   * Android 5+ only
+   * @param params 
+   */
   @Cordova({callbackOrder: 'reverse'})
   requestConnectionPriority (params: {connectionPriority: 'low' | 'balanced' | 'high'} & AddressParams) : Promise<{
     status: 'connectionPriorityRequested',
@@ -403,21 +418,33 @@ export class BluetoothLE extends IonicNativePlugin {
     return
   }
 
+  /**
+   * Android 6+
+   */
   @Cordova({callbackOrder: 'reverse'})
   hasPermission () : Promise<{hasPermission: boolean}> {
     return
   }
 
+  /**
+   * Android 6+
+   */
   @Cordova({callbackOrder: 'reverse'})
   requestPermission (): Promise<{requestPermission: boolean}> {
     return
   }
 
+  /**
+   * Android 6+
+   */
   @Cordova({callbackOrder: 'reverse'})
   requestLocation (): Promise<{requestLocation: boolean}> {
     return
   }
 
+  /**
+   * Android 6+
+   */
   @Cordova({callbackOrder: 'reverse'})
   isLocationEnabled (): Promise<{isLocationEnabled: boolean}> {
     return

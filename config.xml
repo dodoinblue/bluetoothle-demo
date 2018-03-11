@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="io.ionic.starter" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.example.bleplugindemo" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>myBleApp</name>
     <description>An awesome Ionic/Cordova app.</description>
     <author email="hi@ionicframework" href="http://ionicframework.com/">Ionic Framework Team</author>
@@ -78,6 +78,7 @@
     </platform>
     <allow-navigation href="http://172.25.25.154:8100" />
     <engine name="android" spec="^6.2.3" />
+    <engine name="ios" spec="^4.4.0" />
     <plugin name="cordova-plugin-bluetoothle" spec="^4.4.3" />
     <plugin name="cordova-plugin-device" spec="^2.0.1" />
     <plugin name="cordova-plugin-ionic-keyboard" spec="^2.0.5" />
