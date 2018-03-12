@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, AlertController, Platform } from 'ionic-angular';
+import { NavController, AlertController, Platform, LoadingController } from 'ionic-angular';
 import { BluetoothLE } from '../../wrapper/BluetoothLeWrapper'
 // import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/operator/take'
@@ -15,11 +15,13 @@ export class HomePage {
   hasPermission: boolean
   isLocationEnabled: boolean
   osType: 'ios' | 'android' | 'other'
+  scanStatus: string = 'Scan stopped'
 
   constructor(public navCtrl: NavController,
     private alertCtrl: AlertController,
-    public ble: BluetoothLE,
-    private platform: Platform
+    private ble: BluetoothLE,
+    private platform: Platform,
+    private loadingCtrl: LoadingController
   ) {
     console.log('constructor')
     if (platform.platforms().includes('ios')) {
@@ -89,15 +91,56 @@ export class HomePage {
   }
 
   scanWithTimeout() {
+    let loading = this.loadingCtrl.create({
+      content: 'Scanning. Please wait...'
+    });
+    loading.present()
     console.log('scanWithTimeout')
+    let scanParams = {"services": []}
+    let foundDevicesMap = new Map()
+    this.ble.startScan(scanParams).subscribe(result => {
+      if (result.status === 'scanResult' && result.name) {
+        foundDevicesMap.set(result.address, result)
+      } else if (result.status === 'scanStarted') {
+        console.log('scan started')
+        this.scanStatus = 'scanStarted'
+      } else {
+        // TODO handle error
+        console.log('start scan error')
+      }
+    })
+    // TODO: Make the list reactive. Currently the Alert only has addInput().
+    // Need to extend it to add removeInput() or updateInputs()
+    setTimeout(() => {
+      this.ble.stopScan().then(() => {
+        console.log('scanStopped')
+        this.scanStatus = 'scanStopped'
+        let foundDeviceArray = Array.from(foundDevicesMap.values()).map((d) => {
+          return {
+            type: 'radio',
+            label: d.name,
+            value: d.address
+          } as any
+        })
+        let alert = this.alertCtrl.create({
+          title: 'Discovered devices',
+          inputs: foundDeviceArray,
+          buttons: [{
+            text: 'Connect',
+            handler: selection => {
+              console.log('Connecting to ' + JSON.stringify(selection));
+            }
+          }]
+        })
+        loading.dismiss()
+        alert.present()
+      })
+    }, 5000)
   }
 
   retrieveConnected() {
     console.log('retrieveConnected')
-    this.ble.retrieveConnected({
-      "services": [
-        "180A"      ]
-    }).then((devices) => {
+    this.ble.retrieveConnected({ "services": [ "180A" ] }).then((devices) => {
       console.log(devices)
       let inputs = devices.map((d) => {
         console.log(`name: ${d.name} address: ${d.address}`)

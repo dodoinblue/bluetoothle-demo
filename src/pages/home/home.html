@@ -20,29 +20,29 @@
       <h2>Init</h2>
       <p>{{ initStatus || 'reading...'}}</p>
     </ion-item>
-    <ion-item *ngIf="osType !== 'ios'" (click)="checkPermissions()">
+    <ion-item *ngIf="osType === 'android'" (click)="checkPermissions()">
       <h2>Permissions...</h2>
       <p> {{ hasPermission || 'permission status goes here...' }}</p>
     </ion-item>
-    <ion-item *ngIf="osType !== 'ios'" (click)="checkLocations()">
+    <ion-item *ngIf="osType === 'android'" (click)="checkLocations()">
       <h2>Locations</h2>
       <p>{{ isLocationEnabled || 'Location status goes here...' }}</p>
     </ion-item>
-    <ion-item *ngIf="osType !== 'ios'" (click)="enable()">
+    <ion-item *ngIf="osType === 'android'" (click)="enable()">
       <h2>Enable</h2>
       <p>Enable Bluetooth</p>
     </ion-item>
-    <ion-item *ngIf="osType !== 'ios'" (click)="disable()">
+    <ion-item *ngIf="osType === 'android'" (click)="disable()">
       <h2>Disable</h2>
       <p>Disable Bluetooth</p>
     </ion-item>
-    <ion-item *ngIf="osType !== 'ios'" (click)="getAdapterInfo()">
+    <ion-item *ngIf="osType === 'android'" (click)="getAdapterInfo()">
       <h2>getAdapterInfo</h2>
       <p>Click to see adapter info...</p>
     </ion-item>
     <ion-item (click)="scanWithTimeout()">
       <h2>scanWithTimeout</h2>
-      <p>Click to scan devices...</p>
+      <p> {{ scanStatus }}</p>
     </ion-item>
     <ion-item (click)="retrieveConnected()">
       <h2>retrieveConnected</h2>
