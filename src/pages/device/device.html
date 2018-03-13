@@ -1,0 +1,33 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>{{ device.name || 'No connection' }}</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+  <ion-list>
+    <ion-item (click)="showDeviceInfo()">
+      <h2>Device Info</h2>
+      <p>Click to view device info</p>
+    </ion-item>
+    <ion-item (click)="checkAndBond()">
+      <h2>Bond</h2>
+      <p>{{ bondStatus }}</p>
+    </ion-item>
+    <ion-item (click)="batteryLevel()">
+      <h2>Battery Level</h2>
+      <p>{{ batteryStatus }}</p>
+    </ion-item>
+    <ion-item (click)="disconnect()">
+      <h2>Disconnect</h2>
+      <p>disconnect device</p>
+    </ion-item>
+    <ion-item (click)="showHeartrate()">
+      <h2>Heartrate</h2>
+      <p>{{ hrStatus }}</p>
+    </ion-item>
+  </ion-list>
+</ion-content>

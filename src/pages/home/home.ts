@@ -3,6 +3,7 @@ import { NavController, AlertController, Platform, LoadingController } from 'ion
 import { BluetoothLE } from '../../wrapper/BluetoothLeWrapper'
 // import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/operator/take'
+import { Subscription } from 'rxjs/Subscription';
 // import { InitParams } from '../../wrapper/models/BlePluginParams';
 
 @Component({
@@ -16,6 +17,8 @@ export class HomePage {
   isLocationEnabled: boolean
   osType: 'ios' | 'android' | 'other'
   scanStatus: string = 'Scan stopped'
+
+  connStatusSubscriptions: Map<string, Subscription> = new Map()
 
   constructor(public navCtrl: NavController,
     private alertCtrl: AlertController,
@@ -93,20 +96,22 @@ export class HomePage {
   scanWithTimeout() {
     let loading = this.loadingCtrl.create({
       content: 'Scanning. Please wait...'
-    });
+    })
     loading.present()
     console.log('scanWithTimeout')
     let scanParams = {"services": []}
     let foundDevicesMap = new Map()
-    this.ble.startScan(scanParams).subscribe(result => {
-      if (result.status === 'scanResult' && result.name) {
-        foundDevicesMap.set(result.address, result)
+    let scanSubscription = this.ble.startScan(scanParams).subscribe(result => {
+      if (result.status === 'scanResult') {
+        if (result.name) {
+          foundDevicesMap.set(result.address, result)
+        }
       } else if (result.status === 'scanStarted') {
         console.log('scan started')
         this.scanStatus = 'scanStarted'
       } else {
         // TODO handle error
-        console.log('start scan error')
+        console.log('start scan error: ' + JSON.stringify(result))
       }
     })
     // TODO: Make the list reactive. Currently the Alert only has addInput().
@@ -115,6 +120,7 @@ export class HomePage {
       this.ble.stopScan().then(() => {
         console.log('scanStopped')
         this.scanStatus = 'scanStopped'
+        scanSubscription.unsubscribe()
         let foundDeviceArray = Array.from(foundDevicesMap.values()).map((d) => {
           return {
             type: 'radio',
@@ -129,6 +135,7 @@ export class HomePage {
             text: 'Connect',
             handler: selection => {
               console.log('Connecting to ' + JSON.stringify(selection));
+              this.connect(selection)
             }
           }]
         })
@@ -160,6 +167,30 @@ export class HomePage {
     })
   }
 
+  statusListener(status) {
+    console.log(JSON.stringify(status))
+  }
+
+  connect(address: string) {
+    // let loading = this.loadingCtrl.create({
+    //   content: 'Scanning. Please wait...'
+    // })
+    // loading.present()
+    // if (this.connStatusSubscriptions.has(address)) {
+    //   this.connStatusSubscriptions.get(address).unsubscribe()
+    // }
+    // let statusSubscription = this.ble.connect({address: address})
+    // .subscribe((result) => {
+    //   loading.dismiss()
+    //   this.statusListener(result)
+    // })
+    // this.connStatusSubscriptions.set(address, statusSubscription)
+    this.navCtrl.push('DevicePage', {
+      address: address
+    })
+
+  }
+
   ionViewWillLoad() {
     console.log('ionViewWillLoad')
   }
@@ -170,6 +201,11 @@ export class HomePage {
       console.log(`bluetooth status: ${result.status}`)
       this.initStatus = result.status
     })
+  }
+
+  jump() {
+    console.log('jumping')
+    this.navCtrl.push('DevicePage')
   }
 
   ionViewWillLeave() {
