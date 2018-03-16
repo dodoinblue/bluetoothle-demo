@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, LoadingController } from 'ionic-angular';
-import { BluetoothLE } from '../../wrapper/BluetoothLeWrapper';
+import { BluetoothLe } from 'ionic-native-bluetoothle';
 import { Buffer } from 'buffer'
 
 @IonicPage()
@@ -21,7 +21,7 @@ export class DevicePage {
   constructor(public navCtrl: NavController, 
     public navParams: NavParams,
     private loadingCtrl: LoadingController,
-    private ble: BluetoothLE,
+    private ble: BluetoothLe,
   ) {
     console.log('Device page, constructor')
   }

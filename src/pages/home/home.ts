@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, AlertController, Platform, LoadingController } from 'ionic-angular';
-import { BluetoothLE } from '../../wrapper/BluetoothLeWrapper'
+import { BluetoothLe } from 'ionic-native-bluetoothle'
 // import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/operator/take'
 import { Subscription } from 'rxjs/Subscription';
@@ -22,7 +22,7 @@ export class HomePage {
 
   constructor(public navCtrl: NavController,
     private alertCtrl: AlertController,
-    private ble: BluetoothLE,
+    private ble: BluetoothLe,
     private platform: Platform,
     private loadingCtrl: LoadingController
   ) {
