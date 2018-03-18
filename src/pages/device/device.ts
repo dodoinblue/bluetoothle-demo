@@ -1,8 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { IonicPage, NavController, NavParams, LoadingController, Loading } from 'ionic-angular';
 import { BleDevice } from '../../BleDevice';
-// import { BluetoothLe } from 'ionic-native-bluetoothle';
-// import { Buffer } from 'buffer'
 
 @IonicPage()
 @Component({
@@ -20,7 +18,8 @@ export class DevicePage {
 
   constructor(public navCtrl: NavController, 
     public navParams: NavParams,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private changeDetector: ChangeDetectorRef
   ) {
     console.log('Device page, constructor')
     if (!this.navParams.get('device')) {
@@ -58,6 +57,15 @@ export class DevicePage {
   }
 
   checkAndBond() {
+    this.device.isBonded().then(isBonded => {
+      if(isBonded) {
+        this.bondStatus = 'bonded'
+      } else {
+        this.device.bond().subscribe((result) => {
+          this.bondStatus = result.status
+        })
+      }
+    })
   }
 
   batteryLevel() {
@@ -77,7 +85,19 @@ export class DevicePage {
   }
 
   showHeartrate() {
-    console.log('showHeartrate')
+    this.device.subscribeHr((data) => {
+      if (data.status === 'subscribed') {
+        this.hrStatus = 'subscribed'
+      } else if (data.status === 'subscribedResult') {
+        console.log('update hr status: ' + data.value)
+        this.hrStatus = data.value
+      } else if (data.status === 'unsubscribed') {
+        this.hrStatus = 'unsubscribed'
+      } else {
+        this.hrStatus = 'unknown status'
+      }
+      this.changeDetector.detectChanges()
+    })
   }
 
 }

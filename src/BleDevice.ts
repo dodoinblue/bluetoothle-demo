@@ -2,6 +2,7 @@ import { BluetoothLe } from "ionic-native-bluetoothle";
 import { Subscription } from "rxjs/Subscription";
 import { EventEmitter, Output } from '@angular/core'
 import { Buffer } from 'buffer'
+import { Observable } from "rxjs/Observable";
 
 export enum Connection {
   NONE = 'NONE',
@@ -98,6 +99,17 @@ export class BleDevice {
     })
   }
 
+  bond() {
+    return this.ble.bond({address: this.address})
+    // .subscribe((result) => {
+    //   console.log('bonding status: ' + JSON.stringify(result))
+    // })
+  }
+
+  isBonded() {
+    return this.ble.isBonded({address: this.address})
+  }
+
   getDeviceInfo() {
     // if (this.state !== Connection.CONNECTED) {
     //   return Promise.reject('Device Not Connected')
@@ -123,5 +135,31 @@ export class BleDevice {
         let array = this.ble.encodedStringToBytes(result.value)
         console.log('battery: ' + array[0])
     })
+  }
+
+  broadcastingHr: boolean = false
+  subscribeHr(onResult) {
+    let hrCharPath = {
+      address: this.address,
+      service: '180D',
+      characteristic: '2A37'
+    }
+    if(this.broadcastingHr !== true) {
+      this.broadcastingHr = true
+      this.ble.subscribe(hrCharPath).subscribe((data) => {
+        // console.log('hr: ' + JSON.stringify(data))
+        if(data.value) {
+          onResult({status: 'subscribedResult', value: this.ble.encodedStringToBytes(data.value)[1]})
+        } else {
+          onResult(data)
+        }
+      })
+    } else {
+      this.ble.unsubscribe(hrCharPath).then((result) => {
+        console.log('unsubscribe hr: ' + JSON.stringify(result))
+        this.broadcastingHr = false
+        onResult(result)
+      })
+    }
   }
 }
