@@ -4,6 +4,7 @@ import { BluetoothLe } from 'ionic-native-bluetoothle'
 // import { Subscription } from 'rxjs/Subscription';
 import 'rxjs/add/operator/take'
 import { Subscription } from 'rxjs/Subscription';
+import { BleDevice } from '../../BleDevice';
 // import { InitParams } from '../../wrapper/models/BlePluginParams';
 
 @Component({
@@ -135,7 +136,7 @@ export class HomePage {
             text: 'Connect',
             handler: selection => {
               console.log('Connecting to ' + JSON.stringify(selection));
-              this.connect(selection)
+              this.connect(new BleDevice(this.ble, selection))
             }
           }]
         })
@@ -171,7 +172,7 @@ export class HomePage {
     console.log(JSON.stringify(status))
   }
 
-  connect(address: string) {
+  connect(device: any) {
     // let loading = this.loadingCtrl.create({
     //   content: 'Scanning. Please wait...'
     // })
@@ -185,8 +186,9 @@ export class HomePage {
     //   this.statusListener(result)
     // })
     // this.connStatusSubscriptions.set(address, statusSubscription)
+    console.log('bledevice: ' + JSON.stringify(device))
     this.navCtrl.push('DevicePage', {
-      address: address
+      device: device
     })
 
   }

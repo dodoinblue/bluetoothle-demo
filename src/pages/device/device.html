@@ -1,11 +1,10 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>{{ device.name || 'No connection' }}</ion-title>
+    <ion-title>{{ (device && device.name) || 'Connecting...' }}</ion-title>
   </ion-navbar>
 
 </ion-header>
-
 
 <ion-content padding>
   <ion-list>
@@ -20,6 +19,14 @@
     <ion-item (click)="batteryLevel()">
       <h2>Battery Level</h2>
       <p>{{ batteryStatus }}</p>
+    </ion-item>
+    <ion-item (click)="connect()">
+      <h2>Connect</h2>
+      <p>Connect to this device</p>
+    </ion-item>
+    <ion-item (click)="reconnect()">
+      <h2>Reconnect</h2>
+      <p>Retry connection</p>
     </ion-item>
     <ion-item (click)="disconnect()">
       <h2>Disconnect</h2>

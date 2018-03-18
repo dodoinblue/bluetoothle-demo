@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, LoadingController } from 'ionic-angular';
-import { BluetoothLe } from 'ionic-native-bluetoothle';
-import { Buffer } from 'buffer'
+import { IonicPage, NavController, NavParams, LoadingController, Loading } from 'ionic-angular';
+import { BleDevice } from '../../BleDevice';
+// import { BluetoothLe } from 'ionic-native-bluetoothle';
+// import { Buffer } from 'buffer'
 
 @IonicPage()
 @Component({
@@ -14,88 +15,65 @@ export class DevicePage {
   bondStatus: string = 'Click to view bond status'
   hrStatus: string | number = 'Not subscribed'
 
-  device: any = {}
-  reconnectCount = 0
-
+  device: BleDevice
+  loading: Loading
 
   constructor(public navCtrl: NavController, 
     public navParams: NavParams,
-    private loadingCtrl: LoadingController,
-    private ble: BluetoothLe,
+    private loadingCtrl: LoadingController
   ) {
     console.log('Device page, constructor')
+    if (!this.navParams.get('device')) {
+      console.log('Must select a device')
+      return
+    }
+    this.loading = this.loadingCtrl.create({
+      content: 'Please wait...'
+    });
+    this.device = this.navParams.get('device') as BleDevice
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad DevicePage');
-    if (!this.navParams.get('address')) {
-      console.log('Must select a device')
-      return
-    }
-    let loading = this.loadingCtrl.create({
-      content: 'Connecting. Please wait...'
-    })
-    loading.present()
-    this.device.address = this.navParams.get('address')
-    this.ble.connect({address: this.device.address}).subscribe(result => {
-      if (result.status === 'disconnected') {
-        this.reconnectCount ++
-        if (this.reconnectCount > 2) {
-          // give up
-          this.navCtrl.pop()
-        } else {
-          this.ble.reconnect({address: this.device.address}).then((result) => {
-            console.log('reconnect: ' + JSON.stringify(result))
-          })
-        }
-      } else {
-        this.reconnectCount = 0
-        loading.dismiss()
-        this.device.name = result.name
-        this.ble.discover({address: this.device.address}).then((result) => {
-          console.log(JSON.stringify(result))
-        })
+
+    this.device.stateChangeEvent.subscribe(event => {
+      console.log('event: ' + JSON.stringify(event))
+      if(event.newState === 'CONNECTED') {
+        this.loading.dismiss()
+      } else if (event.newState === 'CLOSED') {
+        this.navCtrl.pop()
       }
     })
+
+    this.loading.present()
+    this.device.connect()
   }
 
   showDeviceInfo() {
-    console.log('showDeviceInfo')
-    this.ble.read({
-      address: this.device.address,
-      service: '1800',
-      characteristic: '2a00'
-    }).then((result) => {
-      console.log(JSON.stringify(result))
-      let array = this.ble.encodedStringToBytes(result.value)
-      console.log(Buffer.from(array).toString())
+    this.device.getDeviceInfo().then((info) => {
+      console.log(JSON.stringify(info))
     }).catch((error) => {
-      console.log(`error reading device info: ${JSON.stringify(error)}`)
+      console.log('error show info: ' + JSON.stringify(error))
     })
   }
 
   checkAndBond() {
-    console.log('checkAndBond')
   }
 
   batteryLevel() {
-    console.log('batteryLevel')
-    this.ble.read({
-      address: this.device.address,
-      service: '180f',
-      characteristic: '2a19'}).then((result) => {
-        console.log(JSON.stringify(result))
-    }).catch((error) => {
-      console.log(`error reading battery: ${JSON.stringify(error)}`)
-    })
+    return this.device.readBatteryLevel()
+  }
+
+  connect() {
+    return this.device.connect()
+  }
+
+  reconnect() {
+    return this.device.reconnect()
   }
 
   disconnect() {
-    console.log('disconnect')
-    this.ble.disconnect({address: this.device.address}).then((result) => {
-      console.log(JSON.stringify(result))
-      this.navCtrl.pop()
-    })
+    return this.device.disconnect().catch((error) => { console.log(JSON.stringify(error))})
   }
 
   showHeartrate() {
