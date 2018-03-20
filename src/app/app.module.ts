@@ -7,6 +7,8 @@ import { BluetoothLe } from 'ionic-native-bluetoothle'
 
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
+import { MyBleMock } from '../MyBleMock';
+// import { BluetoothLeMock } from 'ionic-native-bluetoothle/mocks/BluetoothLeMock' // Use default mock
 
 @NgModule({
   declarations: [
@@ -25,7 +27,8 @@ import { HomePage } from '../pages/home/home';
   providers: [
     StatusBar,
     SplashScreen,
-    BluetoothLe,
+    // BluetoothLe, // Use real plugin
+    { provide: BluetoothLe, useClass: MyBleMock }, // Use mock
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })
