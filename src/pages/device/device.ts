@@ -12,6 +12,7 @@ export class DevicePage {
   batteryStatus: string = 'Click to view device info'
   bondStatus: string = 'Click to view bond status'
   hrStatus: string | number = 'Not subscribed'
+  hrStatus2: string | number = 'Not subscribed'
 
   device: BleDevice
   loading: Loading
@@ -37,7 +38,7 @@ export class DevicePage {
 
     this.device.stateChangeEvent.subscribe(event => {
       console.log('event: ' + JSON.stringify(event))
-      if(event.newState === 'CONNECTED') {
+      if(event.newState === 'discovered') {
         this.loading.dismiss()
       } else if (event.newState === 'CLOSED') {
         this.navCtrl.pop()
@@ -49,7 +50,7 @@ export class DevicePage {
   }
 
   showDeviceInfo() {
-    this.device.getDeviceInfo().then((info) => {
+    this.device.getSerialNumber().then((info) => {
       console.log(JSON.stringify(info))
     }).catch((error) => {
       console.log('error show info: ' + JSON.stringify(error))
@@ -85,7 +86,8 @@ export class DevicePage {
   }
 
   showHeartrate() {
-    this.device.subscribeHr((data) => {
+    this.device.subscribeHr().subscribe(data => {
+      console.log('sub: ' + JSON.stringify(data))
       if (data.status === 'subscribed') {
         this.hrStatus = 'subscribed'
       } else if (data.status === 'subscribedResult') {
@@ -97,6 +99,25 @@ export class DevicePage {
         this.hrStatus = 'unknown status'
       }
       this.changeDetector.detectChanges()
+    })
+  }
+
+  showHeartrate2() {
+    this.device.subscribeHr().subscribe(data => {
+      console.log('sub2: ' + JSON.stringify(data))
+      if (data.status === 'subscribed') {
+        this.hrStatus2 = 'subscribed'
+      } else if (data.status === 'subscribedResult') {
+        console.log('update hr2 status: ' + data.value)
+        this.hrStatus2 = data.value
+      } else if (data.status === 'unsubscribed') {
+        this.hrStatus2 = 'unsubscribed'
+      } else {
+        this.hrStatus2 = 'unknown status'
+      }
+      this.changeDetector.detectChanges()
+    }, error => {
+      console.log('hr2 error: ' + JSON.stringify(error))
     })
   }
 

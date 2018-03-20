@@ -103,6 +103,7 @@ export class HomePage {
     let scanParams = {"services": []}
     let foundDevicesMap = new Map()
     let scanSubscription = this.ble.startScan(scanParams).subscribe(result => {
+      console.log(JSON.stringify(result))
       if (result.status === 'scanResult') {
         if (result.name) {
           foundDevicesMap.set(result.address, result)

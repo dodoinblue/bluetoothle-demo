@@ -1,16 +1,17 @@
-import { BluetoothLe } from "ionic-native-bluetoothle";
-import { Subscription } from "rxjs/Subscription";
+import { BluetoothLe } from "ionic-native-bluetoothle"
+import { Subscription } from "rxjs/Subscription"
 import { EventEmitter, Output } from '@angular/core'
 import { Buffer } from 'buffer'
-import { Observable } from "rxjs/Observable";
+import { Observable } from "rxjs/Observable"
+import { map } from 'rxjs/operators'
 
-export enum Connection {
-  NONE = 'NONE',
-  CONNECTING = 'CONNECTING',
-  CONNECTED = 'CONNECTED',
+export enum DeviceState {
+  NONE = 'none',
+  CONNECTING = 'connecting',
+  CONNECTED = 'connected',
   DISCOVERED = 'discovered',
-  DISCONNECTED = 'DISCONNECTED',
-  CLOSED = 'CLOSED'
+  DISCONNECTED = 'disconnected',
+  CLOSED = 'closed'
 }
 
 const CONNECTION_TIMEOUT = 15 * 1000
@@ -19,33 +20,32 @@ const CONNECTION_MAX_RETRY = 3
 export class BleDevice {
 
   private connectionSubscription: Subscription
-  private state: Connection
+  private state: DeviceState
   private reconnectCount: number = 0
 
   public name: string
   private services: any[]
 
-  @Output() stateChangeEvent: EventEmitter<{oldState: Connection, newState: Connection}> = new EventEmitter();
+  @Output() stateChangeEvent: EventEmitter<{oldState: DeviceState, newState: DeviceState}> = new EventEmitter();
 
   constructor(private ble: BluetoothLe, private address: string) {
-    console.log('BleDevice constructor')
-    this.state = Connection.NONE
+    this.state = DeviceState.NONE
   }
 
-  private setState(newState: Connection) {
-    console.log(`Connection ${this.state} -> ${newState}`)
+  private setState(newState: DeviceState) {
+    console.log(`State: ${this.state} -> ${newState}`)
     this.stateChangeEvent.emit({
       oldState: this.state,
       newState: newState
     })
     this.state = newState
-    if(newState === Connection.CONNECTED) {
+    if(newState === DeviceState.CONNECTED) {
       this.reconnectCount = 0      
     }
   }
 
   connect() {
-    this.setState(Connection.CONNECTING)
+    this.setState(DeviceState.CONNECTING)
     let cancelConnectionTask = setTimeout(() => {
       this.connectionSubscription.unsubscribe()
       this.close()
@@ -54,9 +54,9 @@ export class BleDevice {
       console.log('connection sub: ' + JSON.stringify(result))
       clearTimeout(cancelConnectionTask)
       if (result.status === 'disconnected') {
-        this.setState(Connection.DISCONNECTED)
+        this.setState(DeviceState.DISCONNECTED)
       } else if (result.status === 'connected') {
-        this.setState(Connection.CONNECTED)
+        this.setState(DeviceState.CONNECTED)
         this.name = result.name
         this.discover()
       } else {
@@ -70,14 +70,14 @@ export class BleDevice {
   discover() {
     this.ble.discover({address: this.address, clearCache: true}).then((result) => {
       this.services = result.services
-      this.setState(Connection.DISCOVERED)
+      this.setState(DeviceState.DISCOVERED)
     })
   }
 
   disconnect() {
     return this.ble.disconnect({address: this.address}).then((result) => {
       console.log('disconnect.then: ' + JSON.stringify(result))
-      this.setState(Connection.DISCONNECTED)
+      this.setState(DeviceState.DISCONNECTED)
       return this.close()
     })
   }
@@ -86,7 +86,7 @@ export class BleDevice {
     return this.ble.reconnect({address: this.address}).then(result => {
       console.log('reconnect.then: ' + JSON.stringify(result))
       if (result.status === 'connected') {
-        this.setState(Connection.DISCOVERED)
+        this.setState(DeviceState.DISCOVERED)
       } else if (result.status === 'disconnected') {
         this.reconnectCount++
       }
@@ -95,25 +95,19 @@ export class BleDevice {
 
   close() {
     return this.ble.close({address: this.address}).then(() => {
-      this.setState(Connection.CLOSED)
+      this.setState(DeviceState.CLOSED)
     })
   }
 
   bond() {
     return this.ble.bond({address: this.address})
-    // .subscribe((result) => {
-    //   console.log('bonding status: ' + JSON.stringify(result))
-    // })
   }
 
   isBonded() {
     return this.ble.isBonded({address: this.address})
   }
 
-  getDeviceInfo() {
-    // if (this.state !== Connection.CONNECTED) {
-    //   return Promise.reject('Device Not Connected')
-    // }
+  getSerialNumber() {
     return this.ble.read({
       address: this.address,
       service: '1800',
@@ -137,29 +131,42 @@ export class BleDevice {
     })
   }
 
-  broadcastingHr: boolean = false
-  subscribeHr(onResult) {
+  subscribeHr() {
     let hrCharPath = {
       address: this.address,
       service: '180D',
       characteristic: '2A37'
     }
-    if(this.broadcastingHr !== true) {
-      this.broadcastingHr = true
-      this.ble.subscribe(hrCharPath).subscribe((data) => {
-        // console.log('hr: ' + JSON.stringify(data))
-        if(data.value) {
-          onResult({status: 'subscribedResult', value: this.ble.encodedStringToBytes(data.value)[1]})
-        } else {
-          onResult(data)
+    return this.ble.subscribe(hrCharPath).pipe(map(result => {
+      if(result.status === 'subscribedResult') {
+        return {
+          status: 'subscribedResult',
+          value: this.ble.encodedStringToBytes(result.value)[1]
         }
-      })
-    } else {
-      this.ble.unsubscribe(hrCharPath).then((result) => {
-        console.log('unsubscribe hr: ' + JSON.stringify(result))
-        this.broadcastingHr = false
-        onResult(result)
-      })
-    }
+      } else {
+        return result
+      }
+    }))
+    // if(this.broadcastingHr !== true) {
+    //   this.broadcastingHr = true
+    //   this.ble.subscribe(hrCharPath).subscribe((data) => {
+    //     // console.log('hr: ' + JSON.stringify(data))
+    //     if(data.value) {
+    //       onResult({status: 'subscribedResult', value: this.ble.encodedStringToBytes(data.value)[1]})
+    //     } else {
+    //       onResult(data)
+    //     }
+    //   })
+    // } else {
+    //   this.ble.unsubscribe(hrCharPath).then((result) => {
+    //     console.log('unsubscribe hr: ' + JSON.stringify(result))
+    //     this.broadcastingHr = false
+    //     onResult(result)
+    //   })
+    // }
+  }
+
+  unsubscribeHr() {
+
   }
 }
